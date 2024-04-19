@@ -1,7 +1,15 @@
-import 'package:flutter/gestures.dart';
+import 'dart:async';
+import 'dart:io';
+import 'dart:convert';
+// import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:connectivity/connectivity.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart'
+    as webview_flutter_android;
+import 'package:file_picker/file_picker.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 // final webViewKey = GlobalKey<_MyHomePageState>();
 void main() {
@@ -17,11 +25,43 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme:
+            ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 7, 1, 88)),
         useMaterial3: true,
       ),
-      home: MyHomePage(),
+      home: screenFlash(),
+      debugShowCheckedModeBanner: false,
     );
+  }
+}
+
+class screenFlash extends StatefulWidget {
+  const screenFlash({super.key});
+
+  @override
+  State<screenFlash> createState() => _screenFlashState();
+}
+
+class _screenFlashState extends State<screenFlash> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Timer(
+        Duration(seconds: 3),
+        () => Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => MyHomePage())));
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        color: Colors.white,
+        child: Image(
+          image: AssetImage('assets/keluarga_kartun.jpeg'),
+          width: MediaQuery.of(context).size.width * 50 / 100,
+        ));
   }
 }
 
@@ -88,14 +128,35 @@ class _MyHomePageState extends State<MyHomePage> {
       ..loadRequest(
         // Uri.parse('https://youtube.com/'),
         // Uri.parse('https://smktelkom-mlg.sch.id/'),
-        Uri.parse('https://google.com/'),
+        Uri.parse(
+            'https://sites.google.com/view/materi-sistem-ac-mobil/home?authuser=0'),
       );
+  }
+
+  Future<List<String>> _androidFilePicker(
+      final FileSelectorParams params) async {
+    final result = await FilePicker.platform.pickFiles();
+
+    if (result != null && result.files.single.path != null) {
+      final file = File(result.files.single.path!);
+      return [file.uri.toString()];
+    }
+    return [];
+  }
+
+  void addFileSelectionListener() async {
+    if (Platform.isAndroid) {
+      final androidController = controller.platform as AndroidWebViewController;
+      await androidController.setOnShowFileSelector(_androidFilePicker);
+    }
   }
 
   @override
   void initState() {
     check();
     web1();
+    addFileSelectionListener();
+
     // TODO: implement initState
     super.initState();
   }
@@ -104,23 +165,28 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("Apps"),
+        backgroundColor: Color.fromARGB(255, 7, 1, 88),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.refresh),
+            onPressed: () {
+              check();
+              konek == true ? controller.goBack() : koneksi_not();
+            },
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            ),
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.refresh,
+              color: Colors.white,
+            ),
             onPressed: () {
               check();
               konek == true ? controller.reload() : koneksi_not();
             },
           ),
-          Container(
-              margin: EdgeInsets.only(right: 15),
-              padding: EdgeInsets.all(5),
-              color: loadingPercentage == 100
-                  ? Colors.green[200]
-                  : Colors.blue[200],
-              child: Text(loadingPercentage.toString() + " %"))
         ],
       ),
       body: konek == true
