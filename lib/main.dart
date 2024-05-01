@@ -126,8 +126,6 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       )
       ..loadRequest(
-        // Uri.parse('https://youtube.com/'),
-        // Uri.parse('https://smktelkom-mlg.sch.id/'),
         Uri.parse(
             'https://sites.google.com/view/materi-sistem-ac-mobil/home?authuser=0'),
       );
